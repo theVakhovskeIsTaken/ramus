@@ -262,6 +262,9 @@ public class MovingArea extends JPanel {
     public static boolean DISABLE_RENDERING_HINTS = Options.getBoolean(
             "DISABLE_RENDERING_HINTS", getDefaultRenderingHintsDisability());
 
+    public static boolean DISABLE_BACKGROUND_CACHE = Options.getBoolean(
+            "DISABLE_BACKGROUND_CACHE", getDefaultDisableBackgroundCache());
+
     public int secondNamePartMinus = Options.getInteger("SECOND_PART_MINUS", 2);
 
     private Function lockedFunction = null;
@@ -400,6 +403,10 @@ public class MovingArea extends JPanel {
         if (vmName != null && vmName.contains("OpenJDK"))
             return true;
         return false;
+    }
+
+    private static boolean getDefaultDisableBackgroundCache() {
+        return true;
     }
 
     private final MouseMotionListener moveMoveListener = new MouseMotionListener() {
@@ -2571,6 +2578,10 @@ public class MovingArea extends JPanel {
     }
 
     private void init() {
+        if (DISABLE_BACKGROUND_CACHE) {
+            return;
+        }
+        
         synchronized (backgroundPaintlock) {
             if (bkRepaint)
                 return;

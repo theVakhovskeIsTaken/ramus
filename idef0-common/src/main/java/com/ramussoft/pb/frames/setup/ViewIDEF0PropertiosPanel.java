@@ -72,6 +72,7 @@ public class ViewIDEF0PropertiosPanel extends JPanel {
     private JComboBox actionType = new JComboBox();
 
     private JCheckBox enableRenderingHints = new JCheckBox();
+    private JCheckBox disableBackgroundCache = new JCheckBox();
 
     private NamedFontEditor dfdsRoleNamedFont;
 
@@ -123,7 +124,10 @@ public class ViewIDEF0PropertiosPanel extends JPanel {
         namedColorExt.setColorName("DEFAULT_EXTERNAL_COLOR", Color.white);
         enableRenderingHints.setSelected(!Options.getBoolean(
                 "DISABLE_RENDERING_HINTS", false));
+        disableBackgroundCache.setSelected(Options.getBoolean(
+                "DISABLE_BACKGROUND_CACHE", true));
         enableRenderingHints.setText("EnableRenderingHints");
+        disableBackgroundCache.setText("DisableBackgroundCache");
 
         setLayout(new BorderLayout());
         this.add(getJContentPane(), BorderLayout.CENTER);
@@ -208,7 +212,10 @@ public class ViewIDEF0PropertiosPanel extends JPanel {
                 ((Number) secondPartMinus.getValue()).intValue());
         Options.setBoolean("DISABLE_RENDERING_HINTS",
                 !enableRenderingHints.isSelected());
+        Options.setBoolean("DISABLE_BACKGROUND_CACHE",
+                !disableBackgroundCache.isSelected());
         MovingArea.DISABLE_RENDERING_HINTS = !enableRenderingHints.isSelected();
+        MovingArea.DISABLE_BACKGROUND_CACHE = disableBackgroundCache.isSelected();
         if (actionType.getSelectedIndex() == 0)
             Options.setString("ON_DOUBLE_CLICK", "EDIT");
         else
@@ -285,8 +292,12 @@ public class ViewIDEF0PropertiosPanel extends JPanel {
             jPanel2.add(spPanel, null);
             jPanel2.add(new JPanel(new FlowLayout()), null);
             jPanel2.add(getDefaultDoubleClickActionPanel(), null);
-            jContentPane.add(enableRenderingHints, BorderLayout.SOUTH);
-
+            JPanel checkBox1 = new JPanel(new FlowLayout());
+            checkBox1.add(enableRenderingHints, null);
+            jPanel2.add(checkBox1, null);
+            JPanel checkBox2 = new JPanel(new FlowLayout());
+            checkBox2.add(disableBackgroundCache, null);
+            jPanel2.add(checkBox2, null);
         }
         return jPanel2;
     }
