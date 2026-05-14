@@ -1,0 +1,111 @@
+task macosIcon(type: Exec) {
+    def iconsetDir = file("packaging/macos/Ramus.iconset")
+    def appIconset = "packaging/macos/AppIcon.appiconset"
+    def icnsFile = file("packaging/macos/Ramus.icns")
+
+    doFirst {
+        delete iconsetDir
+        mkdir iconsetDir
+        exec { commandLine 'cp', "${appIconset}/16-mac.png", "${iconsetDir}/icon_16x16.png" }
+        exec { commandLine 'cp', "${appIconset}/32-mac.png", "${iconsetDir}/icon_16x16@2x.png" }
+        exec { commandLine 'cp', "${appIconset}/32-mac.png", "${iconsetDir}/icon_32x32.png" }
+        exec { commandLine 'cp', "${appIconset}/64-mac.png", "${iconsetDir}/icon_32x32@2x.png" }
+        exec { commandLine 'cp', "${appIconset}/128-mac.png", "${iconsetDir}/icon_128x128.png" }
+        exec { commandLine 'cp', "${appIconset}/256-mac.png", "${iconsetDir}/icon_128x128@2x.png" }
+        exec { commandLine 'cp', "${appIconset}/256-mac.png", "${iconsetDir}/icon_256x256.png" }
+        exec { commandLine 'cp', "${appIconset}/512-mac.png", "${iconsetDir}/icon_256x256@2x.png" }
+        exec { commandLine 'cp', "${appIconset}/512-mac.png", "${iconsetDir}/icon_512x512.png" }
+        exec { commandLine 'cp', "${appIconset}/1024-mac.png", "${iconsetDir}/icon_512x512@2x.png" }
+        
+        // Convert mislabeled WebP files to actual PNG
+        exec { commandLine 'sips', '-s', 'format', 'png', *fileTree(iconsetDir).files.collect { it.absolutePath }, '--out', iconsetDir.absolutePath }
+    }
+
+    commandLine 'iconutil', '-c', 'icns', iconsetDir.absolutePath, '--output', icnsFile.absolutePath
+
+    doLast {
+        delete iconsetDir
+    }
+}
+
+task macosPrepareInput(type: Copy, dependsOn: copyFiles) {
+    def inputDir = 'build/macos/input'
+    
+    doFirst {
+        delete inputDir
+    }
+
+    from('dest/full/bin/ramus-startup.jar') {
+        into 'bin'
+    }
+
+    from('dest/full/lib/ramus') {
+        into 'lib/ramus'
+    }
+    from('dest/full/lib/thirdparty') {
+        into 'lib/thirdparty'
+    }
+    
+    into inputDir
+}
+
+task macosApp(type: Exec, dependsOn: [macosIcon, macosPrepareInput]) {
+    def outputDir = file("build/macos/output")
+    
+    doFirst {
+        exec {
+            commandLine 'rm', '-rf', outputDir.absolutePath
+        }
+        mkdir outputDir
+    }
+
+    workingDir projectDir
+    commandLine 'jpackage',
+        '--name', 'Ramus',
+        '--app-version', project.version,
+        '--vendor', 'Ramus Soft Group',
+        '--copyright', 'Copyright (C) 2026 Ramus Soft Group',
+        '--mac-package-identifier', 'com.vitalex.ramus',
+        '--input', 'build/macos/input',
+        '--main-jar', 'lib/ramus/local-client-2.0.2.jar', 
+        '--main-class', 'com.ramussoft.local.Main',
+        '--type', 'app-image',
+        '--icon', 'packaging/macos/Ramus.icns',
+        '--dest', outputDir.absolutePath,
+        '--java-options', '-Xmx512m',
+        '--java-options', '-Dfile.encoding=UTF-8'
+
+    doLast {
+        println "Ad-hoc signing the application..."
+        exec {
+            commandLine 'codesign', '--force', '--deep', '--sign', '-', "${outputDir}/Ramus.app"
+        }
+    }
+}
+
+task macosDmg(type: Exec, dependsOn: [macosIcon, macosPrepareInput]) {
+    def outputDir = file("build/macos/output-dmg")
+    
+    doFirst {
+        exec {
+            commandLine 'rm', '-rf', outputDir.absolutePath
+        }
+        mkdir outputDir
+    }
+
+    workingDir projectDir
+    commandLine 'jpackage',
+        '--name', 'Ramus',
+        '--app-version', project.version,
+        '--vendor', 'Ramus Soft Group',
+        '--copyright', 'Copyright (C) 2026 Ramus Soft Group',
+        '--mac-package-identifier', 'com.vitalex.ramus',
+        '--input', 'build/macos/input',
+        '--main-jar', 'lib/ramus/local-client-2.0.2.jar', 
+        '--main-class', 'com.ramussoft.local.Main',
+        '--type', 'dmg',
+        '--icon', 'packaging/macos/Ramus.icns',
+        '--dest', outputDir.absolutePath,
+        '--java-options', '-Xmx512m',
+        '--java-options', '-Dfile.encoding=UTF-8'
+}

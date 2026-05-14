@@ -85,3 +85,5 @@ izpack {
     compression = 'deflate'
     compressionLevel = 9
 }
+
+apply from: 'build-macos.gradle'
