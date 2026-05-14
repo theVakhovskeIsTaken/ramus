@@ -69,13 +69,7 @@ In the console, navigate to the project folder and run:
 
 4. Now, you can simply run `ramus` in the terminal to launch the application.
 
-# MacOS (Optimized Fork)
-
-This is a macOS‑optimized fork of the Ramus IDEF0/DFD modeling tool. It focuses on native macOS integration and packaging. Windows support is not a goal here and may not work properly.
-
-Download: the latest macOS DMG is available in this repository’s GitHub Releases section.
-
-License: see LICENSE in this repository (unchanged from upstream).
+# MacOS 
 
 ## Requirements (macOS)
 
@@ -90,53 +84,16 @@ Tip: This project supports local overrides without changing your shell’s `JAVA
 1) Build a macOS .app for quick testing
 
 ```
-./gradlew :local-client:createMacApp
-open local-client/build/mac-app/Ramus.app
+./gradlew macosApp
 ```
 
-2) Build a standalone DMG (recommended)
+2) Build a dmg for sharing
 
-```
-./gradlew :local-client:macDmg
-open dest-macos
-```
+You can build a macOS DMG/App, by running:
 
-The DMG contains a standalone app that does not require users to install Java.
-
-Alternatively, download the latest DMG from this repository’s GitHub Releases section.
-
-## Configuration (Optional)
-
-If you keep multiple JDKs, add a local file to point packaging to a specific JDK. These files are ignored by git.
-
-- Create `gradle-local.properties` in the repo root (example):
-
-```
-# Full JDK used for packaging (jdeps, jlink, jpackage)
-packagingJavaHome=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home
-
-# Disable jlink and bundle a full JDK instead (bigger DMG but simpler)
-# packagingUseJlink=false
-
-# Optional explicit module path for jlink (if you want to use modules from a different JDK)
-# packagingJmodsPath=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home/jmods
-```
-
-Alternatively, you can set `org.gradle.java.home` in `gradle.properties` (also ignored by git) if you want Gradle itself to run on a particular JDK.
-
-## Build Tasks Summary
-
-- `:local-client:createMacApp`
-  - Creates a dev `.app` under `local-client/build/mac-app/Ramus.app`.
-  - Uses a generated `.icns` and sets Dock icon flags for a native look.
-
-- `:local-client:macDmg`
-  - Full packaging pipeline: generates `.icns` → optional `jlink` runtime → `jpackage` DMG.
-  - Outputs to `dest/macos/`.
-  - If `jlink` isn’t available, it automatically bundles the full JDK at `packagingJavaHome`.
-
-- `:local-client:makeIcns`
-  - Converts `packaging/macos/AppIcon.appiconset` into a `.icns` using `sips`/`iconutil`.
+```bash
+./gradlew macosDmg
+   ```
 
 ## Running From Source (Optional)
 
